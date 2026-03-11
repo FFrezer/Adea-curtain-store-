@@ -8,21 +8,20 @@ interface CategoryPageProps {
 }
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
-  const {category} = params;
+  const { category } = params;
 
-  const whereClause =
-    category.toLowerCase() === "all"
-      ? {}
-      : {
-          category: {
-            contains: category,
-            mode: "insensitive" as const,
-          },
-        };
+  const whereClause = category.toLowerCase() === "all"
+    ? {}
+    : {
+        category: {
+          contains: category,
+          mode: "insensitive" as const,
+        },
+      };
 
-  // Explicitly select fields on images including createdAt
+  // Cast whereClause as any to satisfy TypeScript
   const products = await db.product.findMany({
-    where: whereClause,
+    where: whereClause as any,
     include: {
       images: {
         select: {
@@ -42,9 +41,8 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
       <h1 className="text-3xl font-bold mb-4">{category} Curtains</h1>
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {products.map((product) => (
-  <ProductCard key={product.id} product={product as ProductWithExtras} />
-      
-      ))}
+          <ProductCard key={product.id} product={product as ProductWithExtras} />
+        ))}
       </div>
     </div>
   );
