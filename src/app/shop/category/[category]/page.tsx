@@ -10,33 +10,31 @@ interface CategoryPageProps {
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { category } = params;
 
-  // Build the where clause as unknown first
-  // Inside CategoryPage.tsx
-const whereClause: unknown =
-  category.toLowerCase() === "all"
-    ? {}
-    : {
-        category: {
-          contains: category,
-          mode: "insensitive",
-        },
-      };
+  // Use unknown for Prisma-safe conditional filters
+  const whereClause: unknown = {};
 
-// Cast to any only for Prisma call
-const products = await db.product.findMany({
-  where: whereClause as any,
-  include: {
-    images: {
-      select: {
-        id: true,
-        createdAt: true,
-        productId: true,
-        url: true,
+  if (category.toLowerCase() !== "all") {
+    (whereClause as Record<string, unknown>).category = {
+      contains: category,
+      mode: "insensitive",
+    };
+  }
+
+  const products = await db.product.findMany({
+    where: whereClause as any,
+    include: {
+      images: {
+        select: {
+          id: true,
+          url: true,
+          createdAt: true,
+          productId: true,
+        },
       },
     },
-  },
-});
-  if (products.length === 0) return notFound();
+  });
+
+  if (!products.length) return notFound();
 
   return (
     <div className="p-6">
