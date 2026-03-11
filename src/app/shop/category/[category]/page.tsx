@@ -10,31 +10,32 @@ interface CategoryPageProps {
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { category } = params;
 
-  // Build a type-safe object for Prisma using Record<string, any>
-  const whereClause: Record<string, any> = {};
-
-  if (category.toLowerCase() !== "all") {
-    whereClause.category = {
-      contains: category,
-      mode: "insensitive", // Prisma runtime accepts this
-    };
-  }
+  // Use Record<string, any> to avoid Prisma QueryMode TypeScript error
+  const whereClause: Record<string, any> =
+    category.toLowerCase() === "all"
+      ? {}
+      : {
+          category: {
+            contains: category,
+            mode: "insensitive",
+          },
+        };
 
   const products = await db.product.findMany({
-    where: whereClause, // no 'any' needed now
+    where: whereClause,
     include: {
       images: {
         select: {
           id: true,
-          url: true,
           createdAt: true,
           productId: true,
+          url: true,
         },
       },
     },
   });
 
-  if (!products.length) return notFound();
+  if (products.length === 0) return notFound();
 
   return (
     <div className="p-6">
