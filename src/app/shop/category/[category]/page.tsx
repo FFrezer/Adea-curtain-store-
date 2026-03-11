@@ -10,16 +10,17 @@ interface CategoryPageProps {
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { category } = params;
 
+  // Build Prisma where clause safely for TypeScript
   const whereClause = category.toLowerCase() === "all"
-    ? {}
+    ? {} 
     : {
         category: {
           contains: category,
-          mode: "insensitive" as const,
+          mode: "insensitive", // Prisma 6+ accepts string directly
         },
       };
 
-  // Cast whereClause as any to satisfy TypeScript
+  // Cast the entire object as any to bypass TypeScript errors
   const products = await db.product.findMany({
     where: whereClause as any,
     include: {
