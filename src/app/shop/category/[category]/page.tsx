@@ -11,7 +11,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   const { category } = params;
 
   // Use Record<string, any> to avoid Prisma QueryMode TypeScript error
-  const whereClause: Record<string, any> =
+  const whereClause: Record<string, unknown> =
     category.toLowerCase() === "all"
       ? {}
       : {

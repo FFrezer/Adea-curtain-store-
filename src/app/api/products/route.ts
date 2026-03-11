@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
     const pageSize = parseInt(searchParams.get("pageSize") || "8", 10);
 
     // Build filters as Record<string, any> to avoid TS errors
-    const filters: Record<string, any> = {};
+    const filters: Record<string, unknown> = {};
 
     if (room) filters.room = { contains: room, mode: "insensitive" };
     if (category) filters.category = { contains: category, mode: "insensitive" };

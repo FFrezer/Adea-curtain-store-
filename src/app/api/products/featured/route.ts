@@ -5,7 +5,7 @@ import type { ProductWithExtras } from "@/types/product";
 export async function GET() {
   try {
     // Use Record<string, any> for Prisma-safe filter
-    const filters: Record<string, any> = { featured: true };
+    const filters: Record<string, unknown> = { featured: true };
 
     const products = await db.product.findMany({
       where: filters,
