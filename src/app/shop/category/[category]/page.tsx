@@ -10,18 +10,18 @@ interface CategoryPageProps {
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { category } = params;
 
-  // Use unknown for Prisma-safe conditional filters
-  const whereClause: unknown = {};
+  // Build a type-safe object for Prisma using Record<string, any>
+  const whereClause: Record<string, any> = {};
 
   if (category.toLowerCase() !== "all") {
-    (whereClause as Record<string, unknown>).category = {
+    whereClause.category = {
       contains: category,
-      mode: "insensitive",
+      mode: "insensitive", // Prisma runtime accepts this
     };
   }
 
   const products = await db.product.findMany({
-    where: whereClause as any,
+    where: whereClause, // no 'any' needed now
     include: {
       images: {
         select: {

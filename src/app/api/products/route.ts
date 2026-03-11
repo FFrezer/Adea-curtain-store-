@@ -10,29 +10,17 @@ export async function GET(req: NextRequest) {
     const page = parseInt(searchParams.get("page") || "1", 10);
     const pageSize = parseInt(searchParams.get("pageSize") || "8", 10);
 
-    // Build filters as unknown
-    const filters: unknown = {};
+    // Build filters as Record<string, any> to avoid TS errors
+    const filters: Record<string, any> = {};
 
-    if (room) {
-      (filters as Record<string, unknown>).room = { contains: room, mode: "insensitive" };
-    }
+    if (room) filters.room = { contains: room, mode: "insensitive" };
+    if (category) filters.category = { contains: category, mode: "insensitive" };
+    if (search) filters.name = { contains: search, mode: "insensitive" };
 
-    if (category) {
-      (filters as Record<string, unknown>).category = { contains: category, mode: "insensitive" };
-    }
-
-    if (search) {
-      (filters as Record<string, unknown>).name = { contains: search, mode: "insensitive" };
-    }
-
-    const totalCount = await db.product.count({ where: filters as any });
-
+    const totalCount = await db.product.count({ where: filters });
     const products = await db.product.findMany({
-      where: filters as any,
-      include: {
-        images: true,
-        variants: true,
-      },
+      where: filters,
+      include: { images: true, variants: true },
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * pageSize,
       take: pageSize,
