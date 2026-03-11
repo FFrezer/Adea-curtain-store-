@@ -16,7 +16,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
       : {
           category: {
             contains: category,
-            mode: "insensitive",
+            mode: "insensitive" as const,
           },
         };
 
