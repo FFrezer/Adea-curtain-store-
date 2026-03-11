@@ -4,7 +4,7 @@ import Image from "next/image";
 import { Product, Image as ProductImage } from "@prisma/client";
 
 interface ProductWithExtras extends Product {
-  images: ProductImage[];
+  images?: ProductImage[]; // make optional for safety
 }
 
 interface AdminProductCardProps {
@@ -28,7 +28,7 @@ export default function AdminProductCard({ product, onEdit }: AdminProductCardPr
       } else {
         alert("Failed to delete product");
       }
-    } catch  {
+    } catch {
       alert("Error deleting product");
     }
   };
@@ -58,8 +58,9 @@ export default function AdminProductCard({ product, onEdit }: AdminProductCardPr
       <p className="text-sm text-gray-500 mb-1">🛏️ Room: {product.room}</p>
       <p className="text-sm text-gray-500 mb-2">📁 Category: {product.category}</p>
 
+      {/* Safe rendering of images */}
       <div className="flex gap-2 overflow-x-auto">
-        {product.images.map((img) => (
+        {(product.images ?? []).map((img) => (
           <Image
             key={img.id}
             src={img.url}

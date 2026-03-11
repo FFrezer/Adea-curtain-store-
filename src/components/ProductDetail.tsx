@@ -5,21 +5,15 @@ import { useState } from "react";
 import { useRouter } from 'next/navigation';
 import { useSession } from "next-auth/react";
 import type { ProductWithExtras } from '@/types/product';
+import useCart, { CartItem } from "@/hooks/useCart";
 
-type CartItem = {
-  id: string;
-  name: string;
-  price: number;
-  image: string;
-  quantity: number;
-
-};
 
 export default function ProductDetail({ product }: { product: ProductWithExtras }) {
   const [selectedImage, setSelectedImage] = useState(
     product.images?.[0]?.url || product.image || "/images/placeholder.png"
   );
   const [justAdded, setJustAdded] = useState(false);
+   const { addToCart } = useCart();
   const router = useRouter();
   const { data: session } = useSession();
 
@@ -48,29 +42,19 @@ export default function ProductDetail({ product }: { product: ProductWithExtras 
   };
 
   const handleAddToCart = () => {
-    const existingCart:CartItem[] = JSON.parse(localStorage.getItem("cart") || "[]");
+    const item: CartItem = {
+      id: product.id,
+      name: product.name,
+      price: product.price ?? 0,
+      image: selectedImage,
+      quantity: 1,
+    };
 
-    const existingIndex = existingCart.findIndex(
-      (item) => item.id === product.id && item.image === selectedImage
-    );
-
-    if (existingIndex !== -1) {
-      existingCart[existingIndex].quantity += 1;
-    } else {
-      existingCart.push({
-        id: product.id,
-        name: product.name,
-        price: product.price ?? 0,
-        image: selectedImage,
-        quantity: 1,
-        
-      });
-    }
-
-    localStorage.setItem("cart", JSON.stringify(existingCart));
+    addToCart(item); // update state & localStorage instantly
     setJustAdded(true);
     setTimeout(() => setJustAdded(false), 2000);
   };
+
 
   return (
     <div className="min-h-screen flex flex-col">

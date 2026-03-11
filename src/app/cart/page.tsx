@@ -135,7 +135,7 @@ ${order.items
 `;
 
     const encoded = encodeURIComponent(orderText);
-    const whatsappURL = `https://wa.me/251939979708?text=${encoded}`; // ← replace number
+    const whatsappURL = `https://wa.me/251939979708?text=${encoded}`; 
 
     generatePDF(); // ✅ Preview first
     toast.success("Generating invoice & redirecting to WhatsApp...");

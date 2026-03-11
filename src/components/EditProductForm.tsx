@@ -14,28 +14,37 @@ export default function EditProductForm({ product }: { product: ProductWithExtra
   const [category, setCategory] = useState(product.category);
   const [description, setDescription] = useState(product.description ?? '');
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    // Validate price before sending
-    const priceNum = parseFloat(price);
-    if (isNaN(priceNum)) {
-      alert('Please enter a valid price');
-      return;
-    }
+  const priceNum = parseFloat(price);
+  if (isNaN(priceNum)) {
+    alert('Please enter a valid price');
+    return;
+  }
 
-    const res = await fetch(`/admin/products/${product.id}/edit/submit`, {
-      method: 'POST', // Match your actual API method and route
-      body: new FormData(e.currentTarget as HTMLFormElement),
-    });
+  const res = await fetch(`/api/admin/product/${product.id}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      name,
+      price: priceNum,
+      branch,
+      room,
+      category,
+      description,
+    }),
+  });
 
-    if (res.ok) {
-      router.push(`/admin/products/${product.id}`);
-    } else {
-      const data = await res.json();
-      alert(data.error || 'Failed to update product');
-    }
-  };
+  if (res.ok) {
+    router.push(`/admin/products/${product.id}`);
+  } else {
+    const data = await res.json();
+    alert(data.error || 'Failed to update product');
+  }
+};
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">

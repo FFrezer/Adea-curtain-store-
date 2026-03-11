@@ -9,7 +9,7 @@ import { CATEGORIES } from '@/constants/categories';
 
 export default function ShopPage() {
   const [category, setCategory] = useState('All');
-  const [search, setSearch] = useState('');
+  const [search ] = useState('');
   const [roomFilter, setRoomFilter] = useState('');
   const [page, setPage] = useState(1);
 
