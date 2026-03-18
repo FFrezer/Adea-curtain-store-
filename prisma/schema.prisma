@@ -1,4 +1,4 @@
-// src/prisma/schema.prisma
+// prisma/schema.prisma
 
 generator client {
   provider = "prisma-client-js"
@@ -6,25 +6,26 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-    
 }
 
+// ------------------ Models ------------------
+
 model Product {
-  id          String         @id @default(cuid())
-  name        String
-  description String?
-  price       Float?
-  branch      Branch
-  room        String
-  category    String
-  featured    Boolean        @default(false)
-  image       String? // 
-  isFeatured  Boolean        @default(false)
-  createdAt   DateTime       @default(now())
-  variants    Variant[]
-  images      ProductImage[] 
-  detailImages       Image[]
-  published   Boolean  @default(true)
+  id           String         @id @default(cuid())
+  name         String
+  description  String?
+  price        Float?
+  branch       Branch
+  room         String
+  category     String
+  featured     Boolean        @default(false)
+  image        String?
+  isFeatured   Boolean        @default(false)
+  createdAt    DateTime       @default(now())
+  variants     Variant[]
+  images       ProductImage[]
+  detailImages Image[]
+  published    Boolean        @default(true)
 }
 
 model Image {
@@ -49,7 +50,7 @@ model Order {
   address   String
   total     Float
   createdAt DateTime    @default(now())
-  items     OrderItem[] // relation to OrderItem
+  items     OrderItem[]
 }
 
 model OrderItem {
@@ -67,13 +68,6 @@ enum Branch {
   MERKATO
   PIASSA
   GERJI
-}
-
-model HeroImage {
-  id        String   @id @default(cuid())
-  src       String
-  alt       String
-  createdAt DateTime @default(now())
 }
 
 model HeroBanner {

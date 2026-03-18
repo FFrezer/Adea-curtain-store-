@@ -1,84 +1,72 @@
-//api/admin/product/[id]/route.ts
-import { NextResponse } from 'next/server';
-import db from '@/lib/prisma/db';
-import type { NextRequest } from 'next/server';
+// src/app/api/product/[id]/route.ts
+import { NextRequest, NextResponse } from "next/server";
+import prisma from "@/lib/prisma/db";
 
-// GET /api/admin/products/[id]
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  const { id } = params;
-
-  const product = await db.product.findUnique({
-    where: { id },
-    include: {
-      images: true,
-    },
-  });
-
-  if (!product) {
-    return NextResponse.json({ error: 'Product not found' }, { status: 404 });
-  }
-
-  return NextResponse.json(product);
+interface ProductUpdateBody {
+  name?: string;
+  description?: string;
+  price?: number;
+  category?: string;
+  branch?: "MERKATO" | "PIASSA" | "GERJI";
+  room?: string;
 }
 
-// DELETE /api/admin/products/[id]
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+// GET /api/product/[id]
+export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const { id } = params;
-
-    // Delete related images first
-    await db.image.deleteMany({
-      where: { productId: id },
+    const product = await prisma.product.findUnique({
+      where: { id: params.id },
+      include: { images: true, variants: true, detailImages: true },
     });
 
-    // Then delete the product
-    await db.product.delete({
-      where: { id },
-    });
+    if (!product) {
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    }
 
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('Error deleting product:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete product' },
-      { status: 500 }
-    );
+    return NextResponse.json(product);
+  } catch (err) {
+    console.error("Error fetching product:", err);
+    return NextResponse.json({ error: "Failed to fetch product" }, { status: 500 });
   }
 }
 
-// PATCH /api/admin/products/[id]
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+// PUT /api/product/[id]
+export async function PUT(_req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const { id } = params;
-    const body = await req.json();
+    const body: ProductUpdateBody = await _req.json();
 
-    const updatedProduct = await db.product.update({
-      where: { id },
+    const updatedProduct = await prisma.product.update({
+      where: { id: params.id },
       data: {
         name: body.name,
         description: body.description,
         price: body.price,
         category: body.category,
         branch: body.branch,
-        // You can add more fields as needed
+        room: body.room,
       },
     });
 
     return NextResponse.json(updatedProduct);
-  } catch (error) {
-    console.error('Error updating product:', error);
-    return NextResponse.json(
-      { error: 'Failed to update product' },
-      { status: 500 }
-    );
+  } catch (err) {
+    console.error("Error updating product:", err);
+    return NextResponse.json({ error: "Failed to update product" }, { status: 500 });
+  }
+}
+
+// DELETE /api/product/[id]
+export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    // Delete related images and variants first
+    await prisma.image.deleteMany({ where: { productId: params.id } });
+    await prisma.productImage.deleteMany({ where: { productId: params.id } });
+    await prisma.variant.deleteMany({ where: { productId: params.id } });
+
+    await prisma.product.delete({ where: { id: params.id } });
+
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error("Error deleting product:", err);
+    return NextResponse.json({ error: "Failed to delete product" }, { status: 500 });
   }
 }

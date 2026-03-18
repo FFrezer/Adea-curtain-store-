@@ -1,15 +1,11 @@
-import { PrismaClient } from "@prisma/client";
+// src/lib/prisma/prisma.ts
+import prisma from "./db"; // default export from db.ts
 
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined;
-};
+// Singleton type for globalThis (if needed later)
+const globalForPrisma = globalThis as unknown as { prisma?: typeof prisma };
 
-export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({
-    log: ["query"],
-  });
+// Export the Prisma client
+export { prisma };
 
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma;
-}
+// TypeScript type for convenience
+export type PrismaClientInstance = typeof prisma;
