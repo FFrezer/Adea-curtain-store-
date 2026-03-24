@@ -3,18 +3,24 @@ import db from "@/lib/prisma/db";
 import ProductDetail from "@/components/ProductDetail";
 
 
-export default async function ProductPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+type Props = {
+  params: Promise<{ id: string }>;
+};
+
+export default async function ProductPage({ params }: Props) {
+  const { id } = await params;
+
+  if (!id) return <div>Product not found</div>;
 
   const product = await db.product.findUnique({
     where: { id },
     include: {
       images: true,
-      variants: true
-    }
+      variants: true,
+    },
   });
 
-  if (!product) return notFound();
+  if (!product) return <div>Product not found</div>;
 
-  return <ProductDetail product={product} />;
+  return <div>{product.name}</div>;
 }

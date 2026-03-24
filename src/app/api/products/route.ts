@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import db from "@/lib/prisma/db";
 
 export async function GET(req: NextRequest) {
-  console.log("DB product key:", Object.keys(db));
+  
   try {
     const { searchParams } = new URL(req.url);
     const room = searchParams.get("room");

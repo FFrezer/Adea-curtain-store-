@@ -55,18 +55,27 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   if (!hasMounted) return null;
 
- const addToCart = (product: Product) => {
+const addToCart = (product: Product) => {
+  let message = "";
+
   setCart((prev) => {
     const existing = prev.find((item) => item.id === product.id);
+
     if (existing) {
-      toast.success(`${product.name} quantity increased`);
+      message = `${product.name} quantity increased`;
       return prev.map((item) =>
-        item.id === product.id ? { ...item, quantity: (item.quantity || 1) + 1 } : item
+        item.id === product.id
+          ? { ...item, quantity: (item.quantity || 1) + 1 }
+          : item
       );
     }
-    toast.success(`${product.name} added to cart`);
+
+    message = `${product.name} added to cart`;
     return [...prev, { ...product, quantity: 1 }];
   });
+
+  // ✅ SAFE: runs after React finishes render
+  toast.success(message);
 };
 
 

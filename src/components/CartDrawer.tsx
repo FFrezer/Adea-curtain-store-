@@ -60,7 +60,14 @@ export default function CartDrawer({ isOpen, onClose }: Props) {
           ) : (
             cart.map((item, index) => (
               <div key={`${item.id}-${index}`} className="flex items-center gap-3">
-                <Image src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded" />
+                <div className="relative w-16 h-16">
+               <Image
+               src={item.image}
+               alt={item.name}
+              fill
+              className="object-cover rounded"
+               />
+              </div>
                 <div className="flex-1">
                   <h3 className="text-sm font-medium">{item.name}</h3>
                   <div className="flex items-center mt-1 space-x-2">
