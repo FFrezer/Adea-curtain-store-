@@ -10,14 +10,16 @@ type EditProductPageProps = {
   };
 };
 
-export async function generateStaticParams(): Promise<{ id: string }[]> {
-  const products = await db.product.findMany({ select: { id: true } });
-  return products.map((p) => ({ id: p.id }));
-}
+// Force SSR (no SSG)
+export const dynamic = "force-dynamic";
 
 export default async function EditProductPage({ params }: EditProductPageProps) {
+  const { id } = params;
+
+  if (!id) return notFound(); // safeguard
+
   const product = await db.product.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: { images: true, variants: true },
   });
 

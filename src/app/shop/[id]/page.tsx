@@ -1,16 +1,18 @@
+// src/app/shop/[id]/page.tsx
 import { notFound } from "next/navigation";
 import db from "@/lib/prisma/db";
 import ProductDetail from "@/components/ProductDetail";
-
 
 type Props = {
   params: Promise<{ id: string }>;
 };
 
-export default async function ProductPage({ params }: Props) {
-  const { id } = await params;
+export const dynamic = "force-dynamic";
 
-  if (!id) return <div>Product not found</div>;
+export default async function ProductPage({ params }: Props) {
+  const { id } = await params; // ✅ unwrap the Promise
+
+  if (!id) return notFound(); // safeguard
 
   const product = await db.product.findUnique({
     where: { id },
@@ -20,7 +22,7 @@ export default async function ProductPage({ params }: Props) {
     },
   });
 
-  if (!product) return <div>Product not found</div>;
+  if (!product) return notFound();
 
-  return <div>{product.name}</div>;
+  return <ProductDetail product={product} />;
 }
