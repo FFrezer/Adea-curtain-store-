@@ -1,132 +1,145 @@
-'use client';
+"use client";
 
 import Image from "next/image";
 import { useState } from "react";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import type { ProductWithExtras } from '@/types/product';
-import useCart, { CartItem } from "@/hooks/useCart";
-
+import type { ProductWithExtras } from "@/types/product";
+import useCart from "@/hooks/useCart";
 
 export default function ProductDetail({ product }: { product: ProductWithExtras }) {
   const [selectedImage, setSelectedImage] = useState(
     product.images?.[0]?.url || product.image || "/images/placeholder.png"
   );
   const [justAdded, setJustAdded] = useState(false);
-   const { addToCart } = useCart();
+  const [selectedVariant, setSelectedVariant] = useState<string | null>(null);
+
+  const { addToCart } = useCart();
   const router = useRouter();
   const { data: session } = useSession();
 
-  const isAdmin = session?.user?.role === 'admin' || session?.user?.email === 'admin@example.com';
-
-  const handleDelete = async () => {
-    const confirmed = confirm('Are you sure you want to delete this product?');
-    if (!confirmed) return;
-
-    try {
-      const res = await fetch(`/api/admin/products/${product.id}`, {
-        method: 'DELETE',
-      });
-
-      if (res.ok) {
-        alert('Product deleted successfully.');
-        router.push('/shop');
-      } else {
-        const data = await res.json();
-        alert('Error deleting product: ' + data.error);
-      }
-    } catch (err) {
-      alert('Unexpected error.');
-      console.error(err);
-    }
-  };
+  const isAdmin =
+    session?.user?.role === "admin" ||
+    session?.user?.email === "admin@example.com";
 
   const handleAddToCart = () => {
-    const item: CartItem = {
+    addToCart({
       id: product.id,
       name: product.name,
       price: product.price ?? 0,
       image: selectedImage,
       quantity: 1,
-    };
+    });
 
-    addToCart(item); // update state & localStorage instantly
     setJustAdded(true);
     setTimeout(() => setJustAdded(false), 2000);
   };
 
+  const handleDelete = async () => {
+    if (!confirm("Delete this product?")) return;
+
+    const res = await fetch(`/api/admin/products/${product.id}`, {
+      method: "DELETE",
+    });
+
+    if (res.ok) router.push("/shop");
+    else alert("Failed to delete");
+  };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <main className="flex-1 max-w-4xl mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row gap-8">
-          {/* Image Section */}
-          <div className="md:w-1/2">
-            <div className="relative aspect-[4/3] w-full rounded-lg overflow-hidden shadow-md border">
-             <Image
-              src={selectedImage}
-              alt={product.name}
-              fill
-              sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-cover transition duration-300 ease-in-out hover:scale-105"
-              />
-            </div>
-
-            {/* Thumbnail Swatches */}
-            <div className="flex mt-4 gap-3 overflow-x-auto pb-2">
-              {(product.images || []).map((img: { url: string }, idx: number) => {
-                const url = img?.url || product.image || "/images/placeholder.png";
-                return (
-                  <div
-                    key={idx}
-                    className={`w-20 h-20 relative border-2 rounded-lg cursor-pointer transition-transform hover:scale-105 ${
-                      selectedImage === url ? "border-black" : "border-gray-300"
-                    }`}
-                    onClick={() => setSelectedImage(url)}
-                  >
-                    <Image
-                      src={url}
-                      alt={`variant-${idx}`}
-                      fill
-                      className="object-cover rounded-lg"
-                    />
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Product Info */}
-          <div className="md:w-1/2">
-            <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
-            <p className="text-gray-600 mb-4">{product.description}</p>
-            <p className="text-xl font-semibold mb-6">${product.price?.toFixed(2)}</p>
-
-            {/* Add to Cart Button */}
-            <button
-              className="bg-black text-white px-6 py-2 rounded hover:bg-gray-800"
-              onClick={handleAddToCart}
-            >
-              Add to Cart
-            </button>
-
-            {/* Subtle Feedback Message */}
-            {justAdded && (
-              <p className="text-green-600 mt-2 animate-fade-in">✅ Added to cart!</p>
-            )}
-
-            {/* Admin Delete Button */}
-            {isAdmin && (
-              <button
-                onClick={handleDelete}
-                className="mt-6 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 ml-4"
-              >
-                🗑️ Delete Product
-              </button>
-            )}
-          </div>
+    <div className="max-w-6xl mx-auto px-4 py-10 grid md:grid-cols-2 gap-10">
+      
+      {/* 🖼️ IMAGE SECTION */}
+      <div>
+        <div className="relative w-full h-[450px] rounded-xl overflow-hidden border shadow-sm">
+          <Image
+            src={selectedImage}
+            alt={product.name}
+            fill
+            className="object-cover"
+          />
         </div>
-      </main>
+
+        <div className="flex gap-3 mt-4 overflow-x-auto">
+          {(product.images || []).map((img, i) => {
+            const url = img?.url || product.image || "/images/placeholder.png";
+            return (
+              <div
+                key={i}
+                onClick={() => setSelectedImage(url)}
+                className={`relative w-20 h-20 rounded-lg border cursor-pointer ${
+                  selectedImage === url ? "border-black" : "border-gray-300"
+                }`}
+              >
+                <Image src={url} alt="" fill className="object-cover rounded-lg" />
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 📦 PRODUCT INFO */}
+      <div className="flex flex-col">
+        <h1 className="text-3xl font-bold">{product.name}</h1>
+
+        {/* Price */}
+        <p className="text-2xl font-semibold text-gray-800 mt-2">
+          ${product.price ? product.price.toFixed(2) : "—"}
+        </p>
+
+        {/* Variants */}
+        {product.variants?.length ? (
+          <div className="mt-6">
+            <h3 className="font-semibold mb-2">Options</h3>
+            <div className="flex gap-2 flex-wrap">
+              {product.variants.map((v) => (
+                <button
+                  key={v.id}
+                  onClick={() => setSelectedVariant(v.id)}
+                  className={`px-3 py-1 border rounded ${
+                    selectedVariant === v.id
+                      ? "bg-black text-white"
+                      : "hover:bg-gray-100"
+                  }`}
+                >
+                  {v.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {/* CTA */}
+        <button
+          onClick={handleAddToCart}
+          className="mt-8 w-full bg-black text-white py-3 rounded-lg text-lg hover:bg-gray-800 transition"
+        >
+          Add to Cart 🛒
+        </button>
+
+        {/* Feedback */}
+        {justAdded && (
+          <p className="text-green-600 mt-2">✅ Added to cart</p>
+        )}
+
+        {/* Description */}
+        <div className="mt-8">
+          <h3 className="font-semibold mb-2">Description</h3>
+          <p className="text-gray-600 leading-relaxed">
+            {product.description || "No description available."}
+          </p>
+        </div>
+
+        {/* Admin */}
+        {isAdmin && (
+          <button
+            onClick={handleDelete}
+            className="mt-8 bg-red-600 text-white py-2 rounded hover:bg-red-700"
+          >
+            🗑 Delete Product
+          </button>
+        )}
+      </div>
     </div>
   );
 }

@@ -1,7 +1,8 @@
-'use client'
+"use client";
+
 import Image from "next/image";
 import { Prisma } from "@prisma/client";
-import { useCart } from "@/context/CartContext"; 
+import { useCart } from "@/context/CartContext";
 import { toast } from "react-hot-toast";
 
 type ProductWithImages = Prisma.ProductGetPayload<{
@@ -11,48 +12,71 @@ type ProductWithImages = Prisma.ProductGetPayload<{
 export default function ProductCard({ product }: { product: ProductWithImages }) {
   const { addToCart } = useCart();
 
-  const handleAddToCart = () => {
-  // Ensure price is present
-  if (product.price == null) {
-    toast.error("This product has no price set.");
-    return;
-  }
+  const image =
+    product.image || product.images?.[0]?.url || "/placeholder.jpg";
 
-  // Ensure image is non-null (fallback to placeholder)
-  const safeImage = product.image ?? product.images?.[0]?.url ?? "/placeholder.jpg";
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault(); // 🛑 prevent navigation when clicking button
 
-  addToCart({
-    ...product,
-    quantity: 1,
-    price: product.price, // non-null
-    image: safeImage,     // non-null string
-  });
+    if (product.price == null) {
+      toast.error("No price set");
+      return;
+    }
 
-  toast.success(`${product.name} added to cart!`);
-};
+    addToCart({
+      ...product,
+      quantity: 1,
+      price: product.price,
+      image,
+    });
+
+    toast.success("Added to cart");
+  };
 
   return (
-    <div className="w-full max-w-md mx-auto">
-      <div className="relative aspect-[4/3] w-full rounded-lg overflow-hidden">
+    <div className="group border rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition bg-white">
+      
+      {/* 🖼️ IMAGE */}
+      <div className="relative w-full h-56 overflow-hidden">
         <Image
-          src={product.image || product.images?.[0]?.url || "/placeholder.jpg"}
+          src={image}
           alt={product.name}
           fill
-          sizes="(max-width:768px) 100vw,
-                 (max-width:1024px) 50vw,
-                 33vw"
-          className="object-cover"
-          priority
+          className="object-cover group-hover:scale-105 transition duration-300"
         />
+
+        {/* Optional badge */}
+        {product.featured && (
+          <span className="absolute top-2 left-2 bg-black text-white text-xs px-2 py-1 rounded">
+            Featured
+          </span>
+        )}
       </div>
-      <h2 className="text-lg font-semibold">{product.name}</h2>
-      <p className="text-sm text-gray-600">{product.category}</p>
-      <button
-        onClick={handleAddToCart}
-        className="mt-2 w-full px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
-      >
-        Add to Cart
-      </button>
+
+      {/* 📦 CONTENT */}
+      <div className="p-4 space-y-2">
+        
+        {/* Name */}
+        <h2 className="font-semibold text-base line-clamp-2">
+          {product.name}
+        </h2>
+
+        {/* Category */}
+        <p className="text-xs text-gray-500">{product.category}</p>
+
+        {/* Price */}
+        <p className="text-lg font-bold">
+          {product.price ? `$${product.price.toFixed(2)}` : "—"}
+        </p>
+
+        {/* Action */}
+        <button
+          onClick={handleAddToCart}
+          className="w-full mt-2 py-2 border rounded-lg text-sm hover:bg-black hover:text-white transition"
+        >
+          Add to Cart
+        </button>
+      </div>
     </div>
   );
 }

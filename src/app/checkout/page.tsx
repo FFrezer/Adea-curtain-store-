@@ -160,40 +160,59 @@ export default function CheckoutPage() {
     window.open(whatsappUrl, "_blank");
     router.push("/shop");
   };
+return (
+  <div className="max-w-6xl mx-auto px-4 py-8 grid md:grid-cols-2 gap-8">
+<p className="text-sm text-gray-500">
+  ✔ Your order will be sent via WhatsApp to our team  
+  ✔ No payment required now  
+  ✔ We will contact you to confirm delivery
+</p>
+    {/* LEFT — FORM */}
+    <form onSubmit={handleSubmit} className="space-y-6">
 
-  return (
-    <div className="max-w-xl mx-auto px-2 py-4">
-      <h1 className="text-2xl font-bold mb-4">🧾 Checkout</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <h1 className="text-2xl font-bold">Checkout</h1>
+
+      {/* Contact Info */}
+      <div className="space-y-3">
+        <h2 className="font-semibold text-lg">Contact Information</h2>
+
         <input
           type="text"
           name="name"
           placeholder="Full Name"
           value={form.name}
           onChange={handleChange}
-          className="w-full px-4 py-2 border rounded"
+          className="w-full px-4 py-2 border rounded-lg"
         />
+
         <input
           type="email"
           name="email"
           placeholder="Email Address"
           value={form.email}
           onChange={handleChange}
-          className="w-full px-4 py-2 border rounded"
+          className="w-full px-4 py-2 border rounded-lg"
         />
+      </div>
+
+      {/* Address */}
+      <div className="space-y-3">
+        <h2 className="font-semibold text-lg">Delivery Details</h2>
+
         <textarea
           name="address"
           placeholder="Delivery Address"
           value={form.address}
           onChange={handleChange}
           rows={4}
-          className="w-full px-4 py-2 border rounded resize-none"
+          className="w-full px-4 py-2 border rounded-lg"
         />
+
         <select
           name="branch"
           value={form.branch}
           onChange={handleChange}
-          className="w-full px-4 py-2 border rounded"
+          className="w-full px-4 py-2 border rounded-lg"
         >
           <option value="">Select Branch</option>
           {Object.keys(branchPhoneMap).map((branch) => (
@@ -202,59 +221,90 @@ export default function CheckoutPage() {
             </option>
           ))}
         </select>
+      </div>
 
-        <div className="space-y-2">
-          <label className="font-medium">📸 Optional Image URLs</label>
-          {form.images.map((url, index) => (
-            <div key={index} className="flex gap-2 items-center">
-              <input
-                type="text"
-                placeholder="https://example.com/image.jpg"
-                value={url}
-                onChange={(e) => handleImageChange(index, e.target.value)}
-                className="w-full px-3 py-2 border rounded"
-              />
-              {form.images.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => removeImage(index)}
-                  className="text-red-500 hover:underline"
-                >
-                  ✖
-                </button>
-              )}
+      {/* Images */}
+      <div className="space-y-3">
+        <h2 className="font-semibold text-lg">Optional References</h2>
+
+        {form.images.map((url, index) => (
+          <input
+            key={index}
+            type="text"
+            placeholder="Paste image URL"
+            value={url}
+            onChange={(e) => handleImageChange(index, e.target.value)}
+            className="w-full px-4 py-2 border rounded-lg"
+          />
+        ))}
+
+        <button
+          type="button"
+          onClick={addImage}
+          className="text-sm text-blue-600 hover:underline"
+        >
+          + Add another image
+        </button>
+      </div>
+
+      {/* CTA */}
+      <button
+        type="submit"
+        className="w-full bg-black text-white py-3 rounded-lg text-lg hover:bg-gray-800"
+      >
+        Place Order via WhatsApp
+      </button>
+
+      {/* Trust Note */}
+      <p className="text-xs text-gray-500 text-center">
+        ✔ No payment required now — you will confirm via WhatsApp
+      </p>
+    </form>
+
+    {/* RIGHT — ORDER SUMMARY */}
+    <div className="border rounded-xl p-5 h-fit shadow-sm">
+      <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
+
+      {cart.length === 0 ? (
+        <p className="text-gray-500">Your cart is empty</p>
+      ) : (
+        <div className="space-y-4">
+          {cart.map((item, i) => (
+            <div key={i} className="flex justify-between text-sm">
+              <div>
+                <p className="font-medium">{item.name}</p>
+                <p className="text-gray-500">
+                  {item.quantity} × {item.price} ETB
+                </p>
+              </div>
+              <p>{item.price * item.quantity} ETB</p>
             </div>
           ))}
-          <button
-            type="button"
-            onClick={addImage}
-            className="text-blue-600 text-sm hover:underline"
-          >
-            ➕ Add Another Image
-          </button>
-        </div>
 
-        <div className="space-y-3 mt-6">
-          <button
-            onClick={previewInvoice}
-            className="w-full py-2 bg-gray-300 rounded hover:bg-gray-400"
-          >
-            👁️ Preview Invoice
-          </button>
-          <button
-            onClick={downloadInvoice}
-            className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            💾 Download Invoice
-          </button>
-          <button
-            type="submit"
-            className="w-full bg-black text-white py-2 rounded hover:bg-gray-800 transition"
-          >
-            📨 Submit Order
-          </button>
+          <div className="border-t pt-3 flex justify-between font-semibold">
+            <span>Total</span>
+            <span>{total} ETB</span>
+          </div>
         </div>
-      </form>
+      )}
+
+      {/* Extra Actions */}
+      <div className="mt-6 space-y-2">
+        <button
+          onClick={previewInvoice}
+          className="w-full py-2 border rounded hover:bg-gray-100"
+        >
+          Preview Invoice
+        </button>
+
+        <button
+          onClick={downloadInvoice}
+          className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          Download Invoice
+        </button>
+      </div>
     </div>
-  );
+  </div>
+);
 }

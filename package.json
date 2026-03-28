@@ -40,8 +40,10 @@
     "react-dropzone": "^14.3.8",
     "react-hot-toast": "^2.5.2",
     "react-swipeable": "^7.0.2",
+    "recharts": "^3.8.1",
     "resend": "^4.5.2",
     "uuid": "^11.1.0",
+    "xlsx": "^0.18.5",
     "zustand": "^5.0.6"
   },
   "devDependencies": {

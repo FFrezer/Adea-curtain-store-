@@ -3,10 +3,9 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
 import { redirect } from "next/navigation";
 import AdminProductList from "@/components/AdminProductList";
-import { Session } from "next-auth";
 
 export default async function AdminProductsPage() {
-  const session = (await getServerSession(authOptions)) as Session;
+  const session = await getServerSession(authOptions);
 
   if (!session || !session.user) {
     redirect("/auth/login?callbackUrl=/admin/products");

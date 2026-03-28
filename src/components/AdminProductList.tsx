@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -7,13 +7,11 @@ import ProductEditModal from "@/components/ProductEditModal";
 import { Product, Branch, Image } from "@prisma/client";
 import { Session } from "next-auth";
 
-// ✅ Define the full type that includes relations
 export interface ProductWithExtras extends Product {
   images: Image[];
   branch: Branch;
 }
 
-// ✅ Props now expect fully populated product objects
 interface AdminProductListProps {
   session: Session;
   products: ProductWithExtras[];
@@ -22,11 +20,18 @@ interface AdminProductListProps {
 export default function AdminProductList({ session, products }: AdminProductListProps) {
   const [selectedProduct, setSelectedProduct] = useState<ProductWithExtras | null>(null);
   const [productList, setProductList] = useState<ProductWithExtras[]>(products);
+  const [search, setSearch] = useState("");
 
-  // ✅ Handle update from modal
+  // ✅ FILTER (CORRECT PLACE)
+  const filteredProducts = productList.filter((product) =>
+    product.name.toLowerCase().includes(search.toLowerCase())
+  );
+
   const handleProductUpdate = (updatedProduct: ProductWithExtras) => {
     setProductList((prev) =>
-      prev.map((product) => (product.id === updatedProduct.id ? updatedProduct : product))
+      prev.map((product) =>
+        product.id === updatedProduct.id ? updatedProduct : product
+      )
     );
     setSelectedProduct(null);
   };
@@ -41,6 +46,7 @@ export default function AdminProductList({ session, products }: AdminProductList
             Logged in as:{" "}
             <strong>{session.user?.name || session.user?.email}</strong>
           </p>
+
           <form
             method="post"
             action="/api/auth/signout"
@@ -49,11 +55,7 @@ export default function AdminProductList({ session, products }: AdminProductList
             }}
           >
             <input type="hidden" name="callbackUrl" value="/" />
-            <button
-              type="submit"
-              className="mt-1 text-sm text-red-600 hover:underline"
-              aria-label="Log out"
-            >
+            <button className="mt-1 text-sm text-red-600 hover:underline">
               Log out
             </button>
           </form>
@@ -70,9 +72,18 @@ export default function AdminProductList({ session, products }: AdminProductList
         </Link>
       </div>
 
-      {/* Product Grid */}
+      {/* 🔍 SEARCH */}
+      <input
+        type="text"
+        placeholder="Search products..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="border px-3 py-2 rounded mb-6 w-full"
+      />
+
+      {/* ✅ PRODUCT GRID */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {productList.map((product) => (
+        {filteredProducts.map((product) => (
           <AdminProductCard
             key={product.id}
             product={product}

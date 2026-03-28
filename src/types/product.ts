@@ -22,6 +22,6 @@ export type TransformedProduct = {
 
 export type ProductWithExtras = Product & {
   images: ProductImage[];
-  variants: Variant[];
+  variants: (Variant & { name: string })[];
    
 };

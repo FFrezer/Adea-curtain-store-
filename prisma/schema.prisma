@@ -42,7 +42,11 @@ model Variant {
   product   Product @relation(fields: [productId], references: [id])
   productId String
 }
-
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  DELIVERED
+}
 model Order {
   id        String      @id @default(cuid())
   name      String
@@ -51,6 +55,9 @@ model Order {
   total     Float
   createdAt DateTime    @default(now())
   items     OrderItem[]
+  branch    String
+  images    Json
+  status    OrderStatus @default(PENDING)
 }
 
 model OrderItem {
@@ -59,6 +66,7 @@ model OrderItem {
   orderId   String
   productId String
   name      String
+  branch    String
   price     Float
   quantity  Int
   image     String
